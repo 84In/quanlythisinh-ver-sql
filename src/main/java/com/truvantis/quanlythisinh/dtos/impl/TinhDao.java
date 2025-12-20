@@ -7,13 +7,35 @@ import com.truvantis.quanlythisinh.models.Tinh;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Data Access Object (DAO) cho thực thể {@link Tinh}.
+ * Lớp này chịu trách nhiệm thao tác với bảng {@code tinh} trong cơ sở dữ liệu,
+ * bao gồm các chức năng: thêm, sửa, xóa và truy vấn tỉnh/thành.
+ * Được triển khai theo mô hình Singleton nhằm đảm bảo chỉ tồn tại
+ * một instance duy nhất trong suốt vòng đời ứng dụng.
+ */
 public class TinhDao extends GenericDao<Tinh> implements TinhDaoInterface {
 
+
+    /**
+     * Instance duy nhất của {@code TinhDao} (Singleton).
+     */
     private static TinhDao instance;
 
+    /**
+     * Constructor riêng nhằm ngăn việc khởi tạo đối tượng
+     * {@code TinhDao} từ bên ngoài lớp.
+     */
     private TinhDao() {
     }
 
+    /**
+     * Trả về instance duy nhất của {@code TinhDao}.
+     * Phương thức được đồng bộ hóa để đảm bảo an toàn
+     * trong môi trường đa luồng.
+     *
+     * @return instance của {@code TinhDao}
+     */
     public static synchronized TinhDao getInstance() {
         if (instance == null) {
             instance = new TinhDao();
@@ -21,7 +43,11 @@ public class TinhDao extends GenericDao<Tinh> implements TinhDaoInterface {
         return instance;
     }
 
-    // ================= SAVE =================
+    /**
+     * Lưu mới một tỉnh/thành vào cơ sở dữ liệu.
+     *
+     * @param tinh đối tượng {@link Tinh} cần lưu
+     */
     @Override
     public void saveTinh(Tinh tinh) {
         String sql = """
@@ -31,14 +57,22 @@ public class TinhDao extends GenericDao<Tinh> implements TinhDaoInterface {
         insert(sql, tinh.getMaTinh(), tinh.getTenTinh());
     }
 
-    // ================= DELETE =================
+    /**
+     * Xóa một tỉnh/thành khỏi cơ sở dữ liệu.
+     *
+     * @param tinh đối tượng {@link Tinh} cần xóa
+     */
     @Override
     public void deleteTinh(Tinh tinh) {
         String sql = "DELETE FROM tinh WHERE ma_tinh = ?";
         update(sql, tinh.getMaTinh());
     }
 
-    // ================= UPDATE =================
+    /**
+     * Cập nhật thông tin tỉnh/thành.
+     *
+     * @param tinh đối tượng {@link Tinh} chứa dữ liệu mới
+     */
     @Override
     public void updateTinh(Tinh tinh) {
         String sql = """
@@ -49,7 +83,12 @@ public class TinhDao extends GenericDao<Tinh> implements TinhDaoInterface {
         update(sql, tinh.getTenTinh(), tinh.getMaTinh());
     }
 
-    // ================= FIND BY NAME =================
+    /**
+     * Tìm tỉnh/thành theo tên chính xác.
+     *
+     * @param name tên tỉnh/thành
+     * @return {@link Tinh} nếu tồn tại, ngược lại trả về {@code null}
+     */
     @Override
     public Tinh findTinhByName(String name) {
         String sql = "SELECT * FROM tinh WHERE ten_tinh = ?";
@@ -57,7 +96,12 @@ public class TinhDao extends GenericDao<Tinh> implements TinhDaoInterface {
         return tinh.orElse(null);
     }
 
-    // ================= FIND BY ID =================
+    /**
+     * Tìm tỉnh/thành theo mã tỉnh.
+     *
+     * @param id mã tỉnh
+     * @return {@link Tinh} nếu tồn tại, ngược lại trả về {@code null}
+     */
     @Override
     public Tinh findTinhById(int id) {
         String sql = "SELECT * FROM tinh WHERE ma_tinh = ?";
@@ -65,7 +109,11 @@ public class TinhDao extends GenericDao<Tinh> implements TinhDaoInterface {
         return tinh.orElse(null);
     }
 
-    // ================= FIND ALL =================
+    /**
+     * Lấy danh sách toàn bộ tỉnh/thành.
+     *
+     * @return danh sách {@link Tinh}, sắp xếp theo tên tỉnh
+     */
     @Override
     public List<Tinh> findAllTinh() {
         String sql = "SELECT * FROM tinh ORDER BY ten_tinh";

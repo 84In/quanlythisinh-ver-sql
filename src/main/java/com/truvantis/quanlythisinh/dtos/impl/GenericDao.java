@@ -10,20 +10,29 @@ import java.util.Optional;
 
 public class GenericDao<T> implements GenericDaoInterface<T> {
 
+    //Duong dan ket noi co so du lieu
     private static final String URL =
             "jdbc:mysql://localhost:3306/quanlythisinh?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh";
+
+    //User truy cap co so du lieu
     private static final String USER = "admin";
+
+    //Mat khay truy cap co so du lieu
     private static final String PASSWORD = "admin123";
 
     static {
         try {
+            //Khoi tao class noi ket
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
+            //Bat loi khi co loi trong khoi tao class noi ket
             throw new RuntimeException("Không load được MySQL Driver", e);
         }
     }
 
+    //Khoi tao noi ket
     protected Connection getConnection() throws SQLException {
+        //Tra ve noi ket voi co so du lieu
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
