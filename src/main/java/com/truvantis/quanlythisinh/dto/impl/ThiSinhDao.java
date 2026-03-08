@@ -1,8 +1,8 @@
-package com.truvantis.quanlythisinh.dtos.impl;
+package com.truvantis.quanlythisinh.dto.impl;
 
-import com.truvantis.quanlythisinh.dtos.ThiSinhDaoInterface;
-import com.truvantis.quanlythisinh.mappers.impl.ThiSinhMapper;
-import com.truvantis.quanlythisinh.models.ThiSinh;
+import com.truvantis.quanlythisinh.dto.ThiSinhDaoInterface;
+import com.truvantis.quanlythisinh.mapper.impl.ThiSinhMapper;
+import com.truvantis.quanlythisinh.model.ThiSinh;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +16,6 @@ import java.util.Optional;
  */
 public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterface {
 
-
     /**
      * Instance duy nhất của {@code ThiSinhDao} (Singleton).
      */
@@ -29,14 +28,14 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
     private ThiSinhDao() {
     }
 
-
     /**
      * Trả về instance duy nhất của {@code ThiSinhDao}.
      * Phương thức được đồng bộ hóa (synchronized) để đảm bảo
      * an toàn trong môi trường đa luồng.
      *
      * @return instance của {@code ThiSinhDao}
-     */    public static synchronized ThiSinhDao getInstance() {
+     */
+    public static synchronized ThiSinhDao getInstance() {
         if (instance == null) {
             instance = new ThiSinhDao();
         }
@@ -49,22 +48,21 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
      * @param ts đối tượng {@link ThiSinh} cần lưu
      */
     @Override
-    public void saveThiSinh(ThiSinh ts) {
+    public long saveThiSinh(ThiSinh ts) {
         String sql = """
-            INSERT INTO thi_sinh
-            (ten_thi_sinh, ma_tinh, ngay_sinh, gioi_tinh,
-             diem_mon_1, diem_mon_2, diem_mon_3)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """;
-        insert(sql,
+                    INSERT INTO ThiSinh
+                    (tenThiSinh, maTinh, ngaySinh, gioiTinh,
+                     diemMon1, diemMon2, diemMon3)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """;
+        return insert(sql,
                 ts.getTenThiSinh(),
                 ts.getQueQuan().getMaTinh(),
                 ts.getNgaySinh(),
                 ts.isGioiTinh(),
                 ts.getDiemMon1(),
                 ts.getDiemMon2(),
-                ts.getDiemMon3()
-        );
+                ts.getDiemMon3());
     }
 
     /**
@@ -75,16 +73,16 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
     @Override
     public void updateThiSinh(ThiSinh ts) {
         String sql = """
-            UPDATE thi_sinh SET
-                ten_thi_sinh = ?,
-                ma_tinh = ?,
-                ngay_sinh = ?,
-                gioi_tinh = ?,
-                diem_mon_1 = ?,
-                diem_mon_2 = ?,
-                diem_mon_3 = ?
-            WHERE ma_thi_sinh = ?
-        """;
+                    UPDATE thi_sinh SET
+                        ten_thi_sinh = ?,
+                        ma_tinh = ?,
+                        ngay_sinh = ?,
+                        gioi_tinh = ?,
+                        diem_mon_1 = ?,
+                        diem_mon_2 = ?,
+                        diem_mon_3 = ?
+                    WHERE ma_thi_sinh = ?
+                """;
         update(sql,
                 ts.getTenThiSinh(),
                 ts.getQueQuan().getMaTinh(),
@@ -93,8 +91,7 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
                 ts.getDiemMon1(),
                 ts.getDiemMon2(),
                 ts.getDiemMon3(),
-                ts.getMaThiSinh()
-        );
+                ts.getMaThiSinh());
     }
 
     /**
@@ -104,7 +101,7 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
      */
     @Override
     public void deleteThiSinh(int maThiSinh) {
-        update("DELETE FROM thi_sinh WHERE ma_thi_sinh = ?", maThiSinh);
+        update("DELETE FROM thiSinh WHERE maThiSinh = ?", maThiSinh);
     }
 
     /**
@@ -116,11 +113,11 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
     @Override
     public ThiSinh findById(int maThiSinh) {
         String sql = """
-            SELECT ts.*, t.ten_tinh
-            FROM thi_sinh ts
-            JOIN tinh t ON ts.ma_tinh = t.ma_tinh
-            WHERE ts.ma_thi_sinh = ?
-        """;
+                    SELECT ts.*, t.tenTinh
+                    FROM thiSinh ts
+                    JOIN tinh t ON ts.maTinh = t.maTinh
+                    WHERE ts.maThiSinh = ?
+                """;
         Optional<ThiSinh> ts = queryOne(sql, new ThiSinhMapper(), maThiSinh);
         return ts.orElse(null);
     }
@@ -133,11 +130,11 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
     @Override
     public List<ThiSinh> findAll() {
         String sql = """
-            SELECT ts.*, t.ten_tinh
-            FROM thi_sinh ts
-            JOIN tinh t ON ts.ma_tinh = t.ma_tinh
-            ORDER BY ts.created_at DESC
-        """;
+                    SELECT ts.*, t.tenTinh
+                    FROM thiSinh ts
+                    JOIN tinh t ON ts.maTinh = t.maTinh
+                    ORDER BY ts.maThiSinh ASC
+                """;
         return query(sql, new ThiSinhMapper());
     }
 
@@ -150,11 +147,11 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
     @Override
     public List<ThiSinh> findByTen(String keyword) {
         String sql = """
-            SELECT ts.*, t.ten_tinh
-            FROM thi_sinh ts
-            JOIN tinh t ON ts.ma_tinh = t.ma_tinh
-            WHERE ts.ten_thi_sinh LIKE ?
-        """;
+                    SELECT ts.*, t.tenTinh
+                    FROM thiSinh ts
+                    JOIN tinh t ON ts.maTinh = t.maTinh
+                    WHERE ts.tenThiSinh LIKE ?
+                """;
         return query(sql, new ThiSinhMapper(), "%" + keyword + "%");
     }
 
@@ -167,11 +164,11 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
     @Override
     public List<ThiSinh> findByTinh(int maTinh) {
         String sql = """
-            SELECT ts.*, t.ten_tinh
-            FROM thi_sinh ts
-            JOIN tinh t ON ts.ma_tinh = t.ma_tinh
-            WHERE ts.ma_tinh = ?
-        """;
+                    SELECT ts.*, t.tenTinh
+                    FROM thiSinh ts
+                    JOIN tinh t ON ts.maTinh = t.maTinh
+                    WHERE ts.maTinh = ?
+                """;
         return query(sql, new ThiSinhMapper(), maTinh);
     }
 }

@@ -1,4 +1,4 @@
-package com.truvantis.quanlythisinh.models;
+package com.truvantis.quanlythisinh.model;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -103,8 +103,10 @@ public class Tinh implements Serializable {
      */
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Tinh)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Tinh))
+            return false;
         Tinh tinh = (Tinh) o;
         return maTinh == tinh.maTinh;
     }

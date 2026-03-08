@@ -1,8 +1,8 @@
-package com.truvantis.quanlythisinh.dtos.impl;
+package com.truvantis.quanlythisinh.dto.impl;
 
-import com.truvantis.quanlythisinh.dtos.TinhDaoInterface;
-import com.truvantis.quanlythisinh.mappers.impl.TinhMapper;
-import com.truvantis.quanlythisinh.models.Tinh;
+import com.truvantis.quanlythisinh.dto.TinhDaoInterface;
+import com.truvantis.quanlythisinh.mapper.impl.TinhMapper;
+import com.truvantis.quanlythisinh.model.Tinh;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +15,6 @@ import java.util.Optional;
  * một instance duy nhất trong suốt vòng đời ứng dụng.
  */
 public class TinhDao extends GenericDao<Tinh> implements TinhDaoInterface {
-
 
     /**
      * Instance duy nhất của {@code TinhDao} (Singleton).
@@ -51,9 +50,9 @@ public class TinhDao extends GenericDao<Tinh> implements TinhDaoInterface {
     @Override
     public void saveTinh(Tinh tinh) {
         String sql = """
-            INSERT INTO tinh(ma_tinh, ten_tinh)
-            VALUES (?, ?)
-        """;
+                    INSERT INTO Tinh(maTinh, tenTinh)
+                    VALUES (?, ?)
+                """;
         insert(sql, tinh.getMaTinh(), tinh.getTenTinh());
     }
 
@@ -64,7 +63,7 @@ public class TinhDao extends GenericDao<Tinh> implements TinhDaoInterface {
      */
     @Override
     public void deleteTinh(Tinh tinh) {
-        String sql = "DELETE FROM tinh WHERE ma_tinh = ?";
+        String sql = "DELETE FROM Tinh WHERE maTinh = ?";
         update(sql, tinh.getMaTinh());
     }
 
@@ -76,10 +75,10 @@ public class TinhDao extends GenericDao<Tinh> implements TinhDaoInterface {
     @Override
     public void updateTinh(Tinh tinh) {
         String sql = """
-            UPDATE tinh
-            SET ten_tinh = ?
-            WHERE ma_tinh = ?
-        """;
+                    UPDATE Tinh
+                    SET tenTinh = ?
+                    WHERE maTinh = ?
+                """;
         update(sql, tinh.getTenTinh(), tinh.getMaTinh());
     }
 
@@ -91,7 +90,7 @@ public class TinhDao extends GenericDao<Tinh> implements TinhDaoInterface {
      */
     @Override
     public Tinh findTinhByName(String name) {
-        String sql = "SELECT * FROM tinh WHERE ten_tinh = ?";
+        String sql = "SELECT maTinh, tenTinh, createdAt, updatedAt FROM Tinh WHERE tenTinh = ?";
         Optional<Tinh> tinh = queryOne(sql, new TinhMapper(), name);
         return tinh.orElse(null);
     }
@@ -104,7 +103,7 @@ public class TinhDao extends GenericDao<Tinh> implements TinhDaoInterface {
      */
     @Override
     public Tinh findTinhById(int id) {
-        String sql = "SELECT * FROM tinh WHERE ma_tinh = ?";
+        String sql = "SELECT maTinh, tenTinh, createdAt, updatedAt FROM Tinh WHERE maTinh = ?";
         Optional<Tinh> tinh = queryOne(sql, new TinhMapper(), id);
         return tinh.orElse(null);
     }
@@ -116,7 +115,7 @@ public class TinhDao extends GenericDao<Tinh> implements TinhDaoInterface {
      */
     @Override
     public List<Tinh> findAllTinh() {
-        String sql = "SELECT * FROM tinh ORDER BY ten_tinh";
+        String sql = "SELECT maTinh, tenTinh, createdAt, updatedAt FROM Tinh ORDER BY tenTinh";
         return query(sql, new TinhMapper());
     }
 }

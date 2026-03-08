@@ -1,7 +1,7 @@
-package com.truvantis.quanlythisinh.dtos.impl;
+package com.truvantis.quanlythisinh.dto.impl;
 
-import com.truvantis.quanlythisinh.dtos.GenericDaoInterface;
-import com.truvantis.quanlythisinh.mappers.RowMappersInterface;
+import com.truvantis.quanlythisinh.dto.GenericDaoInterface;
+import com.truvantis.quanlythisinh.mapper.RowMappersInterface;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,29 +10,28 @@ import java.util.Optional;
 
 public class GenericDao<T> implements GenericDaoInterface<T> {
 
-    //Duong dan ket noi co so du lieu
-    private static final String URL =
-            "jdbc:mysql://localhost:3306/quanlythisinh?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh";
+    // Duong dan ket noi co so du lieu
+    private static final String URL = "jdbc:mysql://localhost:3306/quanlythisinh?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh";
 
-    //User truy cap co so du lieu
-    private static final String USER = "admin";
+    // User truy cap co so du lieu
+    private static final String USER = "root";
 
-    //Mat khay truy cap co so du lieu
-    private static final String PASSWORD = "admin123";
+    // Mat khay truy cap co so du lieu
+    private static final String PASSWORD = "";
 
     static {
         try {
-            //Khoi tao class noi ket
+            // Khoi tao class noi ket
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
-            //Bat loi khi co loi trong khoi tao class noi ket
+            // Bat loi khi co loi trong khoi tao class noi ket
             throw new RuntimeException("Không load được MySQL Driver", e);
         }
     }
 
-    //Khoi tao noi ket
+    // Khoi tao noi ket
     protected Connection getConnection() throws SQLException {
-        //Tra ve noi ket voi co so du lieu
+        // Tra ve noi ket voi co so du lieu
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
@@ -43,8 +42,7 @@ public class GenericDao<T> implements GenericDaoInterface<T> {
 
         try (
                 Connection conn = getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)
-        ) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             setParameters(ps, params);
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -71,8 +69,7 @@ public class GenericDao<T> implements GenericDaoInterface<T> {
     public int update(String sql, Object... params) {
         try (
                 Connection conn = getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)
-        ) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             setParameters(ps, params);
             return ps.executeUpdate();
         } catch (SQLException e) {
@@ -85,9 +82,7 @@ public class GenericDao<T> implements GenericDaoInterface<T> {
     public long insert(String sql, Object... params) {
         try (
                 Connection conn = getConnection();
-                PreparedStatement ps =
-                        conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
-        ) {
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             conn.setAutoCommit(false);
             setParameters(ps, params);
             ps.executeUpdate();
@@ -106,8 +101,7 @@ public class GenericDao<T> implements GenericDaoInterface<T> {
     public long count(String sql, Object... params) {
         try (
                 Connection conn = getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)
-        ) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             setParameters(ps, params);
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -122,7 +116,8 @@ public class GenericDao<T> implements GenericDaoInterface<T> {
     private void setParameters(PreparedStatement ps, Object... params)
             throws SQLException {
 
-        if (params == null) return;
+        if (params == null)
+            return;
 
         for (int i = 0; i < params.length; i++) {
             Object p = params[i];

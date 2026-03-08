@@ -1,11 +1,10 @@
-package com.truvantis.quanlythisinh.mappers.impl;
+package com.truvantis.quanlythisinh.mapper.impl;
 
-import com.truvantis.quanlythisinh.mappers.RowMappersInterface;
-import com.truvantis.quanlythisinh.models.Tinh;
+import com.truvantis.quanlythisinh.mapper.RowMappersInterface;
+import com.truvantis.quanlythisinh.model.Tinh;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 
 /**
  * Mapper ánh xạ dữ liệu từ {@link ResultSet}
@@ -27,10 +26,9 @@ public class TinhMapper implements RowMappersInterface<Tinh> {
     @Override
     public Tinh mapRow(ResultSet rs) throws SQLException {
         return new Tinh(
-                rs.getInt("ma_tinh"),
-                rs.getString("ten_tinh"),
-                rs.getTimestamp("created_at"),
-                rs.getTimestamp("updated_at")
-        );
+                rs.getInt("maTinh"),
+                rs.getString("tenTinh"),
+                rs.getTimestamp("createdAt"),
+                rs.getTimestamp("updatedAt"));
     }
 }

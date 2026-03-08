@@ -1,4 +1,4 @@
-package com.truvantis.quanlythisinh.mappers;
+package com.truvantis.quanlythisinh.mapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

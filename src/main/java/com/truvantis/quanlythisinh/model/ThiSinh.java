@@ -1,4 +1,4 @@
-package com.truvantis.quanlythisinh.models;
+package com.truvantis.quanlythisinh.model;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -48,9 +48,16 @@ public class ThiSinh implements Serializable {
     /**
      * Constructor mặc định.
      * Phục vụ cho việc khởi tạo rỗng hoặc ánh xạ dữ liệu từ database.
+     * 
+     * @param diemMon32
+     * @param diemMon22
+     * @param diemMon12
+     * @param gioiTinh2
+     * @param ngaySinh2
+     * @param queQuan2
+     * @param tenThiSinh2
+     * @param maThiSinh2
      */
-    public ThiSinh() {
-    }
 
     /**
      * Constructor khởi tạo đầy đủ thông tin nghiệp vụ của thí sinh.
@@ -65,13 +72,13 @@ public class ThiSinh implements Serializable {
      * @param diemMon3   điểm môn 3
      */
     public ThiSinh(int maThiSinh,
-                   String tenThiSinh,
-                   Tinh queQuan,
-                   Date ngaySinh,
-                   boolean gioiTinh,
-                   float diemMon1,
-                   float diemMon2,
-                   float diemMon3) {
+            String tenThiSinh,
+            Tinh queQuan,
+            Date ngaySinh,
+            boolean gioiTinh,
+            float diemMon1,
+            float diemMon2,
+            float diemMon3) {
         this.maThiSinh = maThiSinh;
         this.tenThiSinh = tenThiSinh;
         this.queQuan = queQuan;
