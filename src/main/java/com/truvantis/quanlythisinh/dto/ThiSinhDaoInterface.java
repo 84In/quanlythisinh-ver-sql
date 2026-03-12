@@ -26,4 +26,6 @@ public interface ThiSinhDaoInterface {
 
     // Lay danh sach theo ma tinh
     List<ThiSinh> findByTinh(int maTinh);
+
+    List<ThiSinh> findByTinhVaMaThiSinh(String tenTinh, Integer maThiSinh);
 }

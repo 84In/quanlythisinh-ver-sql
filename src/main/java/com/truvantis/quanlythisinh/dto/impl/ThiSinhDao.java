@@ -113,7 +113,7 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
     @Override
     public ThiSinh findById(int maThiSinh) {
         String sql = """
-                    SELECT ts.*, t.tenTinh
+                    SELECT ts.maThiSinh, ts.tenThiSinh, ts.ngaySinh, ts.gioiTinh, ts.diemMon1, ts.diemMon2, ts.diemMon3, ts.maTinh, ts.createdAt, ts.updatedAt, t.tenTinh
                     FROM thiSinh ts
                     JOIN tinh t ON ts.maTinh = t.maTinh
                     WHERE ts.maThiSinh = ?
@@ -130,7 +130,7 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
     @Override
     public List<ThiSinh> findAll() {
         String sql = """
-                    SELECT ts.*, t.tenTinh
+                    SELECT ts.maThiSinh, ts.tenThiSinh, ts.ngaySinh, ts.gioiTinh, ts.diemMon1, ts.diemMon2, ts.diemMon3, ts.maTinh, ts.createdAt, ts.updatedAt, t.tenTinh
                     FROM thiSinh ts
                     JOIN tinh t ON ts.maTinh = t.maTinh
                     ORDER BY ts.maThiSinh ASC
@@ -147,7 +147,7 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
     @Override
     public List<ThiSinh> findByTen(String keyword) {
         String sql = """
-                    SELECT ts.*, t.tenTinh
+                    SELECT ts.maThiSinh, ts.tenThiSinh, ts.ngaySinh, ts.gioiTinh, ts.diemMon1, ts.diemMon2, ts.diemMon3, ts.maTinh, t.tenTinh, ts.createdAt, ts.updatedAt
                     FROM thiSinh ts
                     JOIN tinh t ON ts.maTinh = t.maTinh
                     WHERE ts.tenThiSinh LIKE ?
@@ -164,11 +164,23 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
     @Override
     public List<ThiSinh> findByTinh(int maTinh) {
         String sql = """
-                    SELECT ts.*, t.tenTinh
+                    SELECT ts.maThiSinh, ts.tenThiSinh, ts.ngaySinh, ts.gioiTinh, ts.diemMon1, ts.diemMon2, ts.diemMon3, ts.maTinh, ts.createdAt, ts.updatedAt, t.tenTinh
                     FROM thiSinh ts
                     JOIN tinh t ON ts.maTinh = t.maTinh
                     WHERE ts.maTinh = ?
                 """;
         return query(sql, new ThiSinhMapper(), maTinh);
+    }
+
+    @Override
+    public List<ThiSinh> findByTinhVaMaThiSinh(String tenTinh, Integer maThiSinh) {
+        String sql = """
+                    SELECT ts.maThiSinh, ts.tenThiSinh, ts.ngaySinh, ts.gioiTinh, ts.diemMon1, ts.diemMon2, ts.diemMon3, ts.maTinh, ts.createdAt, ts.updatedAt, t.tenTinh
+                    FROM thiSinh ts
+                    JOIN tinh t ON ts.maTinh = t.maTinh
+                    WHERE  (? IS NULL OR t.tenTinh = ?) AND (? IS NULL OR ts.maThiSinh = ?)
+                    ORDER BY ts.maThiSinh ASC
+                """;
+        return query(sql, new ThiSinhMapper(), tenTinh, tenTinh, maThiSinh, maThiSinh);
     }
 }

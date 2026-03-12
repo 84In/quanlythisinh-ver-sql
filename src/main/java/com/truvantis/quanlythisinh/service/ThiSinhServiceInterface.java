@@ -17,7 +17,7 @@ public interface ThiSinhServiceInterface {
     boolean delete(int maThiSinh);
 
     // Tìm kiếm theo tên hoặc mã tỉnh
-    ArrayList<ThiSinh> search(String keyword, int maTinh);
+    ArrayList<ThiSinh> timKiemTheoTenTinhHoacMaThiSinh(String tenTinh, int maThiSinh);
 
     // Tính toán logic: Ví dụ tính tổng điểm 3 môn
     float tinhTongDiem(ThiSinh ts);

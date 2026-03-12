@@ -3,6 +3,8 @@ package com.truvantis.quanlythisinh.view.impl;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.Map;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
@@ -378,7 +380,7 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
         }
     }
 
-    private ThiSinh getThiSinhTuForm() {
+    public ThiSinh getThiSinhTuForm() {
         try {
             // KHÔNG lấy mã từ txtMaTS nữa, mặc định là -1 cho thí sinh mới
             int maThiSinh = -1;
@@ -462,9 +464,11 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
     }
 
     @Override
-    public void thucHienTim() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'thucHienTim'");
+    public Map.Entry<Tinh, String> layDuLieuTim() {
+        Tinh tinh = this.cbTimQue.getSelectedIndex() > 0 ? new Tinh(0, this.cbTimQue.getSelectedItem().toString())
+                : new Tinh(0, "-1");
+        String maTS = this.txtTimMa.getText().trim().isEmpty() ? "-1" : this.txtTimMa.getText().trim();
+        return Map.entry(tinh, maTS);
     }
 
     @Override
@@ -483,10 +487,6 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
     public void thucHienOpenFile() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'thucHienOpenFile'");
-    }
-
-    public ThiSinh layThongTinTuForm() {
-        return getThiSinhTuForm();
     }
 
     public void hienThiThongBao(String string) {

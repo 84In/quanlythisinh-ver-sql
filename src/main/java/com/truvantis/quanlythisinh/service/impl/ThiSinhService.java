@@ -48,9 +48,12 @@ public class ThiSinhService implements ThiSinhServiceInterface {
     }
 
     @Override
-    public ArrayList<ThiSinh> search(String keyword, int maTinh) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'search'");
+    public ArrayList<ThiSinh> timKiemTheoTenTinhHoacMaThiSinh(String tenTinh, int maThiSinh) {
+        if (tenTinh.equals("-1")) {
+            tenTinh = null;
+        }
+        Integer maTS = maThiSinh == -1 ? null : maThiSinh;
+        return (ArrayList<ThiSinh>) thiSinhDao.findByTinhVaMaThiSinh(tenTinh, maTS);
     }
 
     @Override

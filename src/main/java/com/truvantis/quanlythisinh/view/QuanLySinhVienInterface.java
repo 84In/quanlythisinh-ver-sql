@@ -1,8 +1,10 @@
 package com.truvantis.quanlythisinh.view;
 
 import java.util.List;
+import java.util.Map;
 
 import com.truvantis.quanlythisinh.model.ThiSinh;
+import com.truvantis.quanlythisinh.model.Tinh;
 
 public interface QuanLySinhVienInterface {
     // --- Nhóm chức năng Cơ bản (CRUD) ---
@@ -32,7 +34,7 @@ public interface QuanLySinhVienInterface {
     // --- Nhóm chức năng Tìm kiếm & Lọc ---
 
     /** Thực hiện tìm kiếm thí sinh theo các tiêu chí (Quê quán, Mã số...) */
-    void thucHienTim();
+    Map.Entry<Tinh, String> layDuLieuTim();
 
     /** Hủy bộ lọc và hiển thị lại toàn bộ danh sách */
     void huyTim();

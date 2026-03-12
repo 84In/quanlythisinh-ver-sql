@@ -3,8 +3,10 @@ package com.truvantis.quanlythisinh.controller;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.Map;
 
 import com.truvantis.quanlythisinh.model.ThiSinh;
+import com.truvantis.quanlythisinh.model.Tinh;
 import com.truvantis.quanlythisinh.service.impl.ThiSinhService;
 import com.truvantis.quanlythisinh.service.impl.TinhService;
 import com.truvantis.quanlythisinh.view.impl.QuanLySinhVienView;
@@ -39,7 +41,7 @@ public class QuanLiSinhVienController implements ActionListener {
                 // Gọi phương thức xử lý logic thêm/cập nhật từ View
 
                 // this.view.themHoacCapNhatThiSinh(this.view.layThongTinTuForm());
-                long maThiSinh = thiSinhService.insert(this.view.layThongTinTuForm());
+                long maThiSinh = thiSinhService.insert(this.view.getThiSinhTuForm());
 
                 if (maThiSinh != -1) {
                     this.view.hienThiThongBao("Thêm thí sinh thành công với mã: " + maThiSinh);
@@ -83,7 +85,16 @@ public class QuanLiSinhVienController implements ActionListener {
                 this.view.thucHienSaveFile();
                 break;
             case "Tìm":
-                this.view.thucHienTim();
+                Map.Entry<Tinh, String> criteria = this.view.layDuLieuTim();
+                try {
+                    List<ThiSinh> ketQuaTimKiem = thiSinhService.timKiemTheoTenTinhHoacMaThiSinh(
+                            criteria.getKey().getTenTinh(),
+                            Integer.parseInt(criteria.getValue()));
+                    this.view.refreshTable(ketQuaTimKiem);
+                } catch (Exception e1) {
+                    this.view.showMessage("Có lỗi xảy ra khi tìm kiếm.");
+                    e1.printStackTrace();
+                }
                 break;
             case "Hủy Tìm":
                 this.view.huyTim();
