@@ -31,13 +31,12 @@ public class QuanLiSinhVienController implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         // Lấy tên lệnh từ nút bấm (ActionCommand)
         String cm = e.getActionCommand();
-
         // In ra console để debug xem nút đã hoạt động chưa
         System.out.println("Bạn vừa nhấn nút: " + cm);
 
         // Điều hướng các phương thức xử lý trong View
         switch (cm) {
-            case "Thêm":
+            case "THEM":
                 // Gọi phương thức xử lý logic thêm/cập nhật từ View
 
                 // this.view.themHoacCapNhatThiSinh(this.view.layThongTinTuForm());
@@ -52,7 +51,7 @@ public class QuanLiSinhVienController implements ActionListener {
 
                 break;
             // Trong lớp QuanLiSinhVienController, đoạn xử lý sự kiện "Xóa"
-            case "Xóa":
+            case "XOA":
                 // 1. Kiểm tra xem người dùng đã chọn dòng nào trong bảng chưa
                 int row = this.view.getSelectedRowIndex();
 
@@ -81,10 +80,10 @@ public class QuanLiSinhVienController implements ActionListener {
                     this.view.showMessage("Vui lòng chọn một thí sinh trong bảng để xóa!");
                 }
                 break;
-            case "Lưu":
+            case "LUU":
                 this.view.thucHienSaveFile();
                 break;
-            case "Tìm":
+            case "TIM":
                 Map.Entry<Tinh, String> criteria = this.view.layDuLieuTim();
                 try {
                     List<ThiSinh> ketQuaTimKiem = thiSinhService.timKiemTheoTenTinhHoacMaThiSinh(
@@ -96,27 +95,40 @@ public class QuanLiSinhVienController implements ActionListener {
                     e1.printStackTrace();
                 }
                 break;
-            case "Hủy Tìm":
+            case "HUY_TIM":
                 this.view.huyTim();
+                this.view.refreshTable(this.thiSinhService.getAllThiSinh());
                 break;
-            case "Xóa Form":
+            case "XOA_FORM":
                 this.view.xoaForm();
                 break;
-            case "Về chúng tôi":
+            case "VE_CHUNG_TOI":
                 this.view.hienThiAbout();
                 break;
-            case "Thoát":
+            case "THOAT":
                 this.view.thoatKhoiChuongTrinh();
                 break;
-            case "Làm mới":
-                // 1. Lấy dữ liệu mới nhất từ Database thông qua Service
-                List<ThiSinh> danhSachMoi = thiSinhService.getAllThiSinh();
+            case "LAM_MOI":
+                // // 1. Lấy dữ liệu mới nhất từ Database thông qua Service
+                // List<ThiSinh> danhSachMoi = thiSinhService.getAllThiSinh();
 
-                // 2. Bảo View đổ lại dữ liệu
-                this.view.refreshTable(danhSachMoi);
+                // // 2. Bảo View đổ lại dữ liệu
+                // this.view.refreshTable(danhSachMoi);
 
-                // 3. Thông báo cho người dùng
-                this.view.showMessage("Đã cập nhật dữ liệu mới nhất!");
+                // // 3. Thông báo cho người dùng
+                // this.view.showMessage("Đã cập nhật dữ liệu mới nhất!");
+                // Làm mới dữ liệu bằng cách gọi lại phương thức tìm kiếm với tiêu chí hiện tại
+                // (nếu có)
+                Map.Entry<Tinh, String> criteria1 = this.view.layDuLieuTim();
+                try {
+                    List<ThiSinh> ketQuaTimKiem = thiSinhService.timKiemTheoTenTinhHoacMaThiSinh(
+                            criteria1.getKey().getTenTinh(),
+                            Integer.parseInt(criteria1.getValue()));
+                    this.view.refreshTable(ketQuaTimKiem);
+                } catch (Exception e1) {
+                    this.view.showMessage("Có lỗi xảy ra.");
+                    e1.printStackTrace();
+                }
                 break;
             default:
                 break;

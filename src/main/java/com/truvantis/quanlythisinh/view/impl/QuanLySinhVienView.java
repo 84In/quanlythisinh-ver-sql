@@ -8,6 +8,8 @@ import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -18,17 +20,55 @@ import com.truvantis.quanlythisinh.model.Tinh;
 import com.truvantis.quanlythisinh.utils.DateUtil;
 import com.truvantis.quanlythisinh.view.QuanLySinhVienInterface;
 
+/**
+ * Giao diện chính (View) của ứng dụng Quản lý thí sinh.
+ *
+ * <p>
+ * Lớp này chịu trách nhiệm xây dựng và quản lý toàn bộ thành phần đồ họa (UI)
+ * của
+ * chương trình, bao gồm:
+ * <ul>
+ * <li>Bảng danh sách thí sinh</li>
+ * <li>Form nhập chi tiết thí sinh</li>
+ * <li>Bộ lọc tìm kiếm</li>
+ * <li>Các nút xử lý (Thêm, Xóa, Cập nhật, ...)</li>
+ * <li>Thanh menu (Mở/Lưu/Thoát, Giới thiệu)</li>
+ * </ul>
+ *
+ * <p>
+ * Chi tiết xử lý logic (xử lý dữ liệu, lưu/đọc file, ... ) được ủy quyền cho
+ * {@link QuanLiSinhVienController} để tách biệt rõ MVC (Model-View-Controller).
+ */
 public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterface {
 
-    private DefaultTableModel modelTable;
-    private JTable table;
+    // ---------- Thành phần hiển thị dữ liệu ----------
+    private DefaultTableModel modelTable; // Data model cho JTable
+    private JTable table; // Bảng danh sách thí sinh
+
+    // ---------- Thành phần nhập liệu (Form) ----------
     private JTextField txtMaTS, txtHoTen, txtNgaySinh, txtDiem1, txtDiem2, txtDiem3, txtTimMa;
     private JComboBox<String> cbQueQuan, cbTimQue;
     private JRadioButton rdNam, rdNu;
 
+    // Controller điều phối sự kiện và xử lý logic
     private QuanLiSinhVienController controller;
+
+    // Dữ liệu chuyên biệt cho combobox Quê quán
     private List<Tinh> listTinh;
 
+    /**
+     * Khởi tạo giao diện chính (View) và thiết lập toàn bộ các thành phần UI.
+     *
+     * <p>
+     * Constructor chịu trách nhiệm:
+     * <ul>
+     * <li>Khởi tạo và cấu hình JFrame</li>
+     * <li>Tạo bảng danh sách thí sinh</li>
+     * <li>Xây dựng form nhập liệu và các nút thao tác</li>
+     * <li>Đăng ký ActionListener cho các thành phần (được xử lý bởi
+     * Controller)</li>
+     * </ul>
+     */
     public QuanLySinhVienView() {
 
         // --- Cấu hình chung ---
@@ -97,7 +137,12 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
         // add(scrollPane, BorderLayout.CENTER);
         // --- 3. Bảng dữ liệu (Center) ---
         String[] columns = { "Mã TS", "Họ Tên", "Quê Quán", "Ngày Sinh", "Giới Tính", "Môn 1", "Môn 2", "Môn 3" };
-        modelTable = new DefaultTableModel(columns, 0);
+        modelTable = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Trả về false để tất cả các ô không thể sửa
+            }
+        };
         table = new JTable(modelTable);
 
         // Cấu hình FlatLaf cho bảng
@@ -248,36 +293,60 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
 
         this.controller = new QuanLiSinhVienController(this);
 
-        JButton btnTim = createStyledButton("Tìm", this.controller, Color.decode("#2ecc71"));
+        JButton btnTim = createStyledButton("Tìm", "TIM", this.controller, Color.decode("#2ecc71"));
         pnlSearch.add(btnTim);
 
-        JButton btnHuy = createStyledButton("Hủy tìm", this.controller, Color.decode("#95a5a6"));
+        JButton btnHuy = createStyledButton("Hủy tìm", "HUY_TIM", this.controller, Color.decode("#95a5a6"));
         pnlSearch.add(btnHuy);
-        pnlButtons.add(createStyledButton("Thêm", this.controller, Color.decode("#3498db")));
-        pnlButtons.add(createStyledButton("Xóa", this.controller, Color.decode("#e74c3c")));
-        pnlButtons.add(createStyledButton("Cập Nhật", this.controller, Color.decode("#f1c40f")));
-        pnlButtons.add(createStyledButton("Xóa Form", this.controller, Color.decode("#7f8c8d")));
-        pnlButtons.add(createStyledButton("Làm mới", this.controller, Color.decode("#27ae60"))); // Gán action từ
-                                                                                                 // Controller
-        // --- 1. Thanh Menu ---
+        pnlButtons.add(createStyledButton("Thêm", "THEM", this.controller, Color.decode("#3498db")));
+        pnlButtons.add(createStyledButton("Xóa", "XOA", this.controller, Color.decode("#e74c3c")));
+        pnlButtons.add(createStyledButton("Cập Nhật", "CAP_NHAT", this.controller, Color.decode("#f1c40f")));
+        pnlButtons.add(createStyledButton("Xóa Form", "XOA_FORM", this.controller, Color.decode("#7f8c8d")));
+        pnlButtons.add(createStyledButton("Làm mới", "LAM_MOI", this.controller, Color.decode("#27ae60"))); // Gán
+
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                // Kiểm tra để tránh việc sự kiện chạy 2 lần (khi nhấn xuống và khi nhả chuột)
+                if (!e.getValueIsAdjusting()) {
+                    hienThiThongTinThiSinhDaChon();
+                }
+            }
+        });// action từ
+           // Controller
+           // --- 1. Thanh Menu ---
         setJMenuBar(createMenuBar(this.controller));
         setVisible(true);
     }
 
-    // Hàm hỗ trợ tạo nút bấm đẹp
-    private JButton createStyledButton(String text, ActionListener action, Color bgColor) {
+    /**
+     * Tạo nút bấm có kiểu dáng đồng bộ với giao diện.
+     *
+     * @param text          Văn bản hiển thị trên nút
+     * @param actionCommand Mã hành động để Controller xử lý
+     * @param action        ActionListener nhận sự kiện từ nút
+     * @param bgColor       Màu nền của nút
+     * @return JButton đã được cấu hình sẵn
+     */
+    private JButton createStyledButton(String text, String actionCommand, ActionListener action, Color bgColor) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btn.setActionCommand(actionCommand); // Gán ID không dấu ở đây
         btn.setBackground(bgColor);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
         btn.setPreferredSize(new Dimension(110, 35));
         btn.addActionListener(action);
-        btn.setActionCommand(text);
         return btn;
     }
 
+    /**
+     * Tạo thanh menu chính (File + Trợ giúp) và gán chung ActionListener.
+     *
+     * @param action ActionListener dùng chung cho tất cả item trong menu
+     * @return JMenuBar đã cấu hình sẵn
+     */
     private JMenuBar createMenuBar(ActionListener action) {
         JMenuBar mb = new JMenuBar();
         Font menuFont = new Font("Arial", Font.BOLD, 14);
@@ -290,17 +359,24 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
         // Bỏ khoảng cách thừa của Menu cha
         mFile.setMargin(new Insets(2, 2, 2, 2));
 
-        String[] fileItems = { "Mở tập tin", "Lưu tập tin", "Separator", "Thoát" };
-        for (String i : fileItems) {
-            if (i.equals("Separator")) {
+        String[][] fileItems = {
+                { "Mở tập tin", "OPEN" },
+                { "Lưu tập tin", "SAVE" },
+                { "Separator", "SEP" },
+                { "Thoát", "EXIT" }
+        };
+
+        for (String[] item : fileItems) {
+            if (item[0].equals("Separator")) {
                 mFile.addSeparator();
             } else {
-                JMenuItem mi = new JMenuItem(i);
+                JMenuItem mi = new JMenuItem(item[0]); // Hiển thị tiếng Việt
+                mi.setActionCommand(item[1]); // Lệnh là tiếng Anh (KHÔNG BAO GIỜ LỖI)
+                mi.addActionListener(action);
                 mi.setFont(menuFont);
                 mi.setMargin(itemMargin); // Quan trọng: Căn lề hẹp cho từng item
                 mi.setIconTextGap(0); // Bỏ khoảng trống dành cho Icon
                 mi.addActionListener(action);
-                mi.setActionCommand(i);
                 mFile.add(mi);
             }
         }
@@ -314,7 +390,7 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
         miAbout.setMargin(itemMargin);
         miAbout.setIconTextGap(0);
         miAbout.addActionListener(action);
-        miAbout.setActionCommand("Về chúng tôi");
+        miAbout.setActionCommand("VE_CHUNG_TOI");
         mHelp.add(miAbout);
 
         mb.add(mFile);
@@ -322,6 +398,11 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
         return mb;
     }
 
+    /**
+     * Khởi tạo dữ liệu cho các combobox (Quê quán và tìm kiếm theo quê quán).
+     *
+     * @param listTinh Danh sách tỉnh/thành để hiển thị trong combobox
+     */
     public void khoiTaoComboBoxTinh(List<Tinh> listTinh) {
         this.listTinh = listTinh;
         cbQueQuan.removeAllItems();
@@ -334,6 +415,11 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
 
     }
 
+    /**
+     * Đổ dữ liệu danh sách thí sinh lên bảng (table).
+     *
+     * @param list Danh sách thí sinh cần hiển thị
+     */
     public void khoiTaoBangDuLieu(List<ThiSinh> list) {
         modelTable.setRowCount(0);
         for (ThiSinh ts : list) {
@@ -346,6 +432,9 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
     }
 
     // --- Override các phương thức Interface ---
+    /**
+     * Reset thông tin trên form nhập liệu về mặc định (xóa sạch các trường).
+     */
     @Override
     public void xoaForm() {
         txtMaTS.setText("");
@@ -358,12 +447,22 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
         rdNam.setSelected(true);
     }
 
+    /**
+     * Hiển thị hộp thoại xác nhận và thoát chương trình nếu người dùng đồng ý.
+     */
     @Override
     public void thoatKhoiChuongTrinh() {
-        if (JOptionPane.showConfirmDialog(this, "Bạn có muốn thoát?") == JOptionPane.YES_OPTION)
+        if (JOptionPane.showConfirmDialog(this, "Bạn có muốn thoát?") == JOptionPane.YES_OPTION) {
             System.exit(0);
+        }
     }
 
+    /**
+     * Thêm mới hoặc cập nhật thí sinh trên bảng (chỉ thao tác UI).
+     *
+     * @param ts Nếu null: dùng dữ liệu từ form để thêm mới, ngược lại dùng object
+     *           được truyền vào.
+     */
     @Override
     public void themHoacCapNhatThiSinh(ThiSinh ts) {
         // Nếu truyền null, ta lấy từ Form
@@ -380,6 +479,12 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
         }
     }
 
+    /**
+     * Lấy thông tin thí sinh hiện tại từ form nhập liệu.
+     *
+     * @return Đối tượng ThiSinh nếu dữ liệu hợp lệ, null nếu dữ liệu không hợp lệ
+     *         (ví dụ điểm không phải số).
+     */
     public ThiSinh getThiSinhTuForm() {
         try {
             // KHÔNG lấy mã từ txtMaTS nữa, mặc định là -1 cho thí sinh mới
@@ -413,6 +518,9 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
         }
     }
 
+    /**
+     * Hiển thị thông tin của thí sinh đang được chọn trong bảng vào form chi tiết.
+     */
     @Override
     public void hienThiThongTinThiSinhDaChon() {
         int row = table.getSelectedRow();
@@ -434,35 +542,63 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
         }
     }
 
+    /**
+     * Lấy chỉ số (index) hàng đang được chọn trong bảng.
+     *
+     * @return Chỉ số dòng đang chọn, hoặc -1 nếu không có dòng nào được chọn.
+     */
     @Override
     public int getSelectedRowIndex() {
         return table.getSelectedRow();
     }
 
+    /**
+     * Hiển thị hộp thoại xác nhận với người dùng.
+     *
+     * @param message Nội dung thông điệp hiển thị
+     * @return true nếu người dùng chọn YES, false nếu chọn NO hoặc đóng cửa sổ.
+     */
     @Override
     public boolean showConfirmDialog(String message) {
         int confirm = JOptionPane.showConfirmDialog(this, message, "Xác nhận", JOptionPane.YES_NO_OPTION);
         return confirm == JOptionPane.YES_OPTION;
     }
 
+    /**
+     * Hiển thị một hộp thoại thông báo đơn giản.
+     *
+     * @param message Nội dung thông báo.
+     */
     @Override
     public void showMessage(String message) {
         JOptionPane.showMessageDialog(this, message);
     }
 
-    // Hàm này chỉ cập nhật giao diện sau khi Controller báo thành công
+    /**
+     * Xóa một dòng trong bảng và reset lại form sau khi xóa thành công.
+     *
+     * @param row Chỉ số dòng cần xóa.
+     */
     @Override
     public void removeRowFromTable(int row) {
         modelTable.removeRow(row);
         xoaForm();
     }
 
+    /**
+     * Hiển thị hộp thoại "Về chúng tôi" với thông tin phiên bản và tác giả.
+     */
     @Override
     public void hienThiAbout() {
         JOptionPane.showMessageDialog(this, "Phần mềm Quản lý Thí sinh v1.0\nTác giả: Truvantis", "Về chúng tôi",
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
+    /**
+     * Lấy dữ liệu đã nhập trong bộ lọc tìm kiếm.
+     *
+     * @return Entry chứa (tỉnh, mã thí sinh) dùng để tìm kiếm.
+     */
     @Override
     public Map.Entry<Tinh, String> layDuLieuTim() {
         Tinh tinh = this.cbTimQue.getSelectedIndex() > 0 ? new Tinh(0, this.cbTimQue.getSelectedItem().toString())
@@ -471,37 +607,69 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
         return Map.entry(tinh, maTS);
     }
 
+    /**
+     * Reset lại các trường tìm kiếm về trạng thái mặc định (không chọn).
+     */
     @Override
     public void huyTim() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'huyTim'");
+        this.cbTimQue.setSelectedIndex(-1);
+        this.txtTimMa.setText("");
+        System.out.println("Hủy tìm: Đã reset các trường tìm kiếm về mặc định.");
     }
 
+    /**
+     * Thực hiện lưu danh sách thí sinh ra file.
+     *
+     * <p>
+     * Hiện tại chức năng này chưa được cài đặt (TODO).
+     */
     @Override
     public void thucHienSaveFile() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'thucHienSaveFile'");
     }
 
+    /**
+     * Thực hiện mở file danh sách thí sinh.
+     *
+     * <p>
+     * Hiện tại chức năng này chưa được cài đặt (TODO).
+     */
     @Override
     public void thucHienOpenFile() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'thucHienOpenFile'");
     }
 
+    /**
+     * Hiển thị hộp thoại thông báo chung (dùng khi cần mở rộng).
+     *
+     * @param string Nội dung thông báo.
+     */
     public void hienThiThongBao(String string) {
         JOptionPane.showMessageDialog(this, string);
     }
 
+    /**
+     * Lấy mã thí sinh của dòng đang được chọn trong bảng.
+     *
+     * @return Mã thí sinh (int)
+     * @throws IllegalArgumentException nếu không có dòng nào được chọn.
+     */
     public int layMaThiSinhTuForm() {
         int row = table.getSelectedRow();
         if (row >= 0) {
-            modelTable.getValueAt(row, 0).toString();
             return Integer.parseInt(modelTable.getValueAt(row, 0).toString());
         }
         throw new IllegalArgumentException("Không có thí sinh nào được chọn");
     }
 
+    /**
+     * Hiển thị hộp thoại xác nhận (Yes/No) với icon cảnh báo.
+     *
+     * @param message Nội dung thông điệp muốn hỏi người dùng.
+     * @return true nếu người dùng chọn YES, false nếu chọn NO.
+     */
     @Override
     public boolean confirmAction(String message) {
         int choice = JOptionPane.showConfirmDialog(
@@ -514,6 +682,11 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
         return choice == JOptionPane.YES_OPTION;
     }
 
+    /**
+     * Làm mới (refresh) toàn bộ bảng dữ liệu theo danh sách thí sinh mới.
+     *
+     * @param danhSachThiSinh Danh sách thí sinh cần hiển thị lại.
+     */
     @Override
     public void refreshTable(List<ThiSinh> danhSachThiSinh) {
         // Xóa sạch dữ liệu cũ trên bảng
@@ -527,4 +700,5 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
             });
         }
     }
+
 }
