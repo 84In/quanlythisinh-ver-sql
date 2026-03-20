@@ -5,27 +5,27 @@ import com.truvantis.quanlythisinh.mapper.RowMappersInterface;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 public class GenericDao<T> implements GenericDaoInterface<T> {
 
-    // Duong dan ket noi co so du lieu
-    private static final String URL = "jdbc:mysql://localhost:3306/quanlythisinh?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh";
+    private static final String DEFAULT_DRIVER = "com.mysql.cj.jdbc.Driver";
+    private static final String DEFAULT_URL = "jdbc:mysql://localhost:3306/quanlythisinh?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh";
+    private static final String DEFAULT_USER = "admin";
+    private static final String DEFAULT_PASSWORD = "admin123";
 
-    // User truy cap co so du lieu
-    private static final String USER = "root";
-
-    // Mat khay truy cap co so du lieu
-    private static final String PASSWORD = "";
+    private static final String DRIVER = System.getProperty("db.driver", DEFAULT_DRIVER);
+    private static final String URL = System.getProperty("db.url", DEFAULT_URL);
+    private static final String USER = System.getProperty("db.user", DEFAULT_USER);
+    private static final String PASSWORD = System.getProperty("db.password", DEFAULT_PASSWORD);
 
     static {
         try {
-            // Khoi tao class noi ket
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            Class.forName(DRIVER);
         } catch (ClassNotFoundException e) {
-            // Bat loi khi co loi trong khoi tao class noi ket
-            throw new RuntimeException("Không load được MySQL Driver", e);
+            throw new RuntimeException("Không load được driver: " + DRIVER, e);
         }
     }
 
@@ -51,7 +51,7 @@ public class GenericDao<T> implements GenericDaoInterface<T> {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Query failed: " + sql, e);
+            throw new RuntimeException("Query failed: " + sql + " params=" + Arrays.toString(params), e);
         }
 
         return results;
@@ -73,7 +73,7 @@ public class GenericDao<T> implements GenericDaoInterface<T> {
             setParameters(ps, params);
             return ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Update failed: " + sql, e);
+            throw new RuntimeException("Update failed: " + sql + " params=" + Arrays.toString(params), e);
         }
     }
 
@@ -92,7 +92,7 @@ public class GenericDao<T> implements GenericDaoInterface<T> {
                 return rs.next() ? rs.getLong(1) : 0;
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Insert failed: " + sql, e);
+            throw new RuntimeException("Insert failed: " + sql + " params=" + Arrays.toString(params), e);
         }
     }
 
@@ -108,7 +108,7 @@ public class GenericDao<T> implements GenericDaoInterface<T> {
                 return rs.next() ? rs.getLong(1) : 0;
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Count failed: " + sql, e);
+            throw new RuntimeException("Count failed: " + sql + " params=" + Arrays.toString(params), e);
         }
     }
 

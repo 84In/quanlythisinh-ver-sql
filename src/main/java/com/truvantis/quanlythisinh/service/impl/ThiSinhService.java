@@ -58,8 +58,11 @@ public class ThiSinhService implements ThiSinhServiceInterface {
 
     @Override
     public float tinhTongDiem(ThiSinh ts) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'tinhTongDiem'");
+        if (ts == null) {
+            throw new IllegalArgumentException("ThiSinh must not be null");
+        }
+        // Tính tổng điểm của 3 môn (giả định hệ điểm thang 10)
+        return ts.getDiemMon1() + ts.getDiemMon2() + ts.getDiemMon3();
     }
 
     @Override
