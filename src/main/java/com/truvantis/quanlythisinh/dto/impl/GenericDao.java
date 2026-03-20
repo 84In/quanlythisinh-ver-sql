@@ -8,6 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Cài đặt chung (Generic) cho các DAO tương tác với cơ sở dữ liệu.
+ *
+ * <p>
+ * Cung cấp các phương thức cơ bản như truy vấn, cập nhật, chèn và đếm.
+ * Các DAO cụ thể sẽ kế thừa lớp này để tái sử dụng logic kết nối và xử lý
+ * tham số.
+ * </p>
+ *
+ * @param <T> loại thực thể
+ */
 public class GenericDao<T> implements GenericDaoInterface<T> {
 
     // Duong dan ket noi co so du lieu
@@ -113,6 +124,18 @@ public class GenericDao<T> implements GenericDaoInterface<T> {
     }
 
     // ================= PARAM =================
+
+    /**
+     * Thiết lập tham số cho {@link PreparedStatement}.
+     *
+     * <p>
+     * Hỗ trợ các kiểu phổ biến và tự động xử lý giá trị {@code null}.
+     * </p>
+     *
+     * @param ps     PreparedStatement cần gán tham số
+     * @param params danh sách tham số theo thứ tự
+     * @throws SQLException nếu gán tham số không hợp lệ
+     */
     private void setParameters(PreparedStatement ps, Object... params)
             throws SQLException {
 

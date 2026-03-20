@@ -51,8 +51,7 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
     public long saveThiSinh(ThiSinh ts) {
         String sql = """
                     INSERT INTO ThiSinh
-                    (tenThiSinh, maTinh, ngaySinh, gioiTinh,
-                     diemMon1, diemMon2, diemMon3)
+                    (tenThiSinh, maTinh, ngaySinh, gioiTinh, diemMon1, diemMon2, diemMon3)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
         return insert(sql,
@@ -73,15 +72,15 @@ public class ThiSinhDao extends GenericDao<ThiSinh> implements ThiSinhDaoInterfa
     @Override
     public void updateThiSinh(ThiSinh ts) {
         String sql = """
-                    UPDATE thi_sinh SET
-                        ten_thi_sinh = ?,
-                        ma_tinh = ?,
-                        ngay_sinh = ?,
-                        gioi_tinh = ?,
-                        diem_mon_1 = ?,
-                        diem_mon_2 = ?,
-                        diem_mon_3 = ?
-                    WHERE ma_thi_sinh = ?
+                    UPDATE thiSinh SET
+                        tenThiSinh = ?,
+                        maTinh = ?,
+                        ngaySinh = ?,
+                        gioiTinh = ?,
+                        diemMon1 = ?,
+                        diemMon2 = ?,
+                        diemMon3 = ?
+                    WHERE maThiSinh = ?
                 """;
         update(sql,
                 ts.getTenThiSinh(),

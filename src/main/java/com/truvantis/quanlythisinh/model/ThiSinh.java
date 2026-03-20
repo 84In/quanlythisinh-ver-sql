@@ -46,20 +46,6 @@ public class ThiSinh implements Serializable {
     private Timestamp updatedAt;
 
     /**
-     * Constructor mặc định.
-     * Phục vụ cho việc khởi tạo rỗng hoặc ánh xạ dữ liệu từ database.
-     * 
-     * @param diemMon32
-     * @param diemMon22
-     * @param diemMon12
-     * @param gioiTinh2
-     * @param ngaySinh2
-     * @param queQuan2
-     * @param tenThiSinh2
-     * @param maThiSinh2
-     */
-
-    /**
      * Constructor khởi tạo đầy đủ thông tin nghiệp vụ của thí sinh.
      *
      * @param maThiSinh  mã thí sinh
