@@ -347,6 +347,12 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
      * @param action ActionListener dùng chung cho tất cả item trong menu
      * @return JMenuBar đã cấu hình sẵn
      */
+    /**
+     * Tạo thanh menu chính của ứng dụng.
+     *
+     * @param action ActionListener dùng chung cho mọi item trong menu
+     * @return {@link JMenuBar} đã cấu hình
+     */
     private JMenuBar createMenuBar(ActionListener action) {
         JMenuBar mb = new JMenuBar();
         Font menuFont = new Font("Arial", Font.BOLD, 14);
@@ -612,7 +618,7 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
      */
     @Override
     public void huyTim() {
-        this.cbTimQue.setSelectedIndex(-1);
+        this.cbTimQue.setSelectedIndex(0);
         this.txtTimMa.setText("");
         System.out.println("Hủy tìm: Đã reset các trường tìm kiếm về mặc định.");
     }

@@ -4,24 +4,53 @@ import java.util.List;
 
 import com.truvantis.quanlythisinh.model.Tinh;
 
+/**
+ * Interface định nghĩa các thao tác truy cập dữ liệu cho thực thể {@link Tinh}.
+ */
 public interface TinhDaoInterface {
 
-    // Luu tinh
+    /**
+     * Lưu mới một tỉnh/thành.
+     *
+     * @param tinh đối tượng tỉnh/thành cần lưu
+     */
     void saveTinh(Tinh tinh);
 
-    // Xoa tinh
+    /**
+     * Xóa tỉnh/thành.
+     *
+     * @param tinh đối tượng tỉnh/thành cần xóa
+     */
     void deleteTinh(Tinh tinh);
 
-    // Cap nhat tinh
+    /**
+     * Cập nhật thông tin tỉnh/thành.
+     *
+     * @param tinh đối tượng tỉnh/thành cần cập nhật
+     */
     void updateTinh(Tinh tinh);
 
-    // Tim tinh theo ten
+    /**
+     * Tìm tỉnh/thành theo tên.
+     *
+     * @param name tên tỉnh/thành
+     * @return đối tượng {@link Tinh} nếu tồn tại, hoặc {@code null}
+     */
     Tinh findTinhByName(String name);
 
-    // Tim tinh theo ma tinh
+    /**
+     * Tìm tỉnh/thành theo mã.
+     *
+     * @param id mã tỉnh
+     * @return đối tượng {@link Tinh} nếu tồn tại, hoặc {@code null}
+     */
     Tinh findTinhById(int id);
 
-    // Lay danh sach tinh
+    /**
+     * Lấy danh sách toàn bộ tỉnh/thành.
+     *
+     * @return danh sách {@link Tinh}
+     */
     List<Tinh> findAllTinh();
 
 }

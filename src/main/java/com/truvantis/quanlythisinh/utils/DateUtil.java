@@ -4,6 +4,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Tiện ích xử lý ngày tháng (chuyển đổi giữa {@link java.util.Date} và chuỗi).
+ *
+ * <p>
+ * Định dạng mặc định là {@code dd/MM/yyyy} (chiều ngày trước).
+ * </p>
+ */
 public class DateUtil {
     // Định dạng ngày tháng chuẩn Việt Nam
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
