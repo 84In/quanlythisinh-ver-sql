@@ -75,6 +75,10 @@ public class ThiSinh implements Serializable {
         this.diemMon3 = diemMon3;
     }
 
+    public ThiSinh() {
+        // TODO Auto-generated constructor stub
+    }
+
     public int getMaThiSinh() {
         return maThiSinh;
     }

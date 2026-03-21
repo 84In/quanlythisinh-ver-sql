@@ -10,6 +10,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -55,6 +56,10 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
 
     // Dữ liệu chuyên biệt cho combobox Quê quán
     private List<Tinh> listTinh;
+
+    // Progress dialog cho tính năng import
+    private JDialog progressDialog;
+    private JProgressBar progressBar;
 
     /**
      * Khởi tạo giao diện chính (View) và thiết lập toàn bộ các thành phần UI.
@@ -292,6 +297,7 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
         add(pnlBottom, BorderLayout.SOUTH);
 
         this.controller = new QuanLiSinhVienController(this);
+        initProgressDialog();
 
         JButton btnTim = createStyledButton("Tìm", "TIM", this.controller, Color.decode("#2ecc71"));
         pnlSearch.add(btnTim);
@@ -302,7 +308,9 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
         pnlButtons.add(createStyledButton("Xóa", "XOA", this.controller, Color.decode("#e74c3c")));
         pnlButtons.add(createStyledButton("Cập Nhật", "CAP_NHAT", this.controller, Color.decode("#f1c40f")));
         pnlButtons.add(createStyledButton("Xóa Form", "XOA_FORM", this.controller, Color.decode("#7f8c8d")));
-        pnlButtons.add(createStyledButton("Làm mới", "LAM_MOI", this.controller, Color.decode("#27ae60"))); // Gán
+        pnlButtons.add(createStyledButton("Làm mới", "LAM_MOI", this.controller, Color.decode("#27ae60")));
+        pnlButtons.add(createStyledButton("Xuất file", "XUAT_FILE", this.controller, Color.decode("#9b59b6")));
+        pnlButtons.add(createStyledButton("Nhập file", "NHAP_FILE", this.controller, Color.decode("#e67e22")));
 
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
@@ -624,30 +632,6 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
     }
 
     /**
-     * Thực hiện lưu danh sách thí sinh ra file.
-     *
-     * <p>
-     * Hiện tại chức năng này chưa được cài đặt (TODO).
-     */
-    @Override
-    public void thucHienSaveFile() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'thucHienSaveFile'");
-    }
-
-    /**
-     * Thực hiện mở file danh sách thí sinh.
-     *
-     * <p>
-     * Hiện tại chức năng này chưa được cài đặt (TODO).
-     */
-    @Override
-    public void thucHienOpenFile() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'thucHienOpenFile'");
-    }
-
-    /**
      * Hiển thị hộp thoại thông báo chung (dùng khi cần mở rộng).
      *
      * @param string Nội dung thông báo.
@@ -705,6 +689,108 @@ public class QuanLySinhVienView extends JFrame implements QuanLySinhVienInterfac
                     ts.getDiemMon1(), ts.getDiemMon2(), ts.getDiemMon3()
             });
         }
+    }
+
+    /**
+     * Hiển thị hộp thoại chọn file để xuất danh sách thí sinh.
+     *
+     * @return Đường dẫn file được chọn, hoặc null nếu người dùng hủy.
+     */
+    public String showExportDialog() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Chọn file để xuất danh sách thí sinh");
+
+        // Thêm filter cho CSV
+        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("CSV Files", "csv"));
+        // Thêm filter cho XLSX
+        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Excel Files", "xlsx"));
+
+        // Mặc định chọn CSV
+        fileChooser.setFileFilter(fileChooser.getChoosableFileFilters()[0]);
+
+        int result = fileChooser.showSaveDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+            // Thêm đuôi nếu chưa có
+            if (fileChooser.getFileFilter() instanceof FileNameExtensionFilter) {
+                String extension = ((FileNameExtensionFilter) fileChooser.getFileFilter())
+                        .getExtensions()[0];
+                if (!filePath.toLowerCase().endsWith("." + extension)) {
+                    filePath += "." + extension;
+                }
+            }
+            return filePath;
+        }
+        return null;
+    }
+
+    /**
+     * Hiển thị hộp thoại chọn file để nhập danh sách thí sinh.
+     *
+     * @return Đường dẫn file được chọn, hoặc null nếu người dùng hủy.
+     */
+    public String showImportDialog() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Chọn file để nhập danh sách thí sinh");
+
+        // Thêm filter cho CSV
+        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("CSV Files", "csv"));
+        // Thêm filter cho XLSX
+        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Excel Files", "xlsx"));
+
+        // Mặc định chọn CSV
+        fileChooser.setFileFilter(fileChooser.getChoosableFileFilters()[0]);
+
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            return fileChooser.getSelectedFile().getAbsolutePath();
+        }
+        return null;
+    }
+
+    /**
+     * Khởi tạo dialog progress cho import file.
+     */
+    private void initProgressDialog() {
+        progressDialog = new JDialog(this, "Đang nhập file...", true);
+        progressDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        progressDialog.setSize(300, 100);
+        progressDialog.setLocationRelativeTo(this);
+
+        progressBar = new JProgressBar(0, 100);
+        progressBar.setStringPainted(true);
+        progressBar.setString("Đang xử lý...");
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel("Vui lòng chờ..."), BorderLayout.NORTH);
+        panel.add(progressBar, BorderLayout.CENTER);
+        progressDialog.add(panel);
+    }
+
+    /**
+     * Hiển thị progress dialog.
+     */
+    public void showProgressDialog() {
+        progressBar.setValue(0);
+        progressBar.setString("Đang xử lý...");
+        progressDialog.setVisible(true);
+    }
+
+    /**
+     * Ẩn progress dialog.
+     */
+    public void hideProgressDialog() {
+        progressDialog.setVisible(false);
+    }
+
+    /**
+     * Cập nhật giá trị progress.
+     * 
+     * @param value giá trị từ 0-100
+     */
+    public void updateProgress(int value) {
+        progressBar.setValue(value);
+        progressBar.setString(value + "%");
     }
 
 }

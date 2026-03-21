@@ -24,8 +24,8 @@ public class GenericDao<T> implements GenericDaoInterface<T> {
 
     private static final String DEFAULT_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String DEFAULT_URL = "jdbc:mysql://localhost:3306/quanlythisinh?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh";
-    private static final String DEFAULT_USER = "admin";
-    private static final String DEFAULT_PASSWORD = "admin123";
+    private static final String DEFAULT_USER = "root";
+    private static final String DEFAULT_PASSWORD = "";
 
     private static final String DRIVER = System.getProperty("db.driver", DEFAULT_DRIVER);
     private static final String URL = System.getProperty("db.url", DEFAULT_URL);

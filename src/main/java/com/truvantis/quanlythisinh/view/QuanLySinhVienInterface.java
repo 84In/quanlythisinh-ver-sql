@@ -84,12 +84,6 @@ public interface QuanLySinhVienInterface {
     /** Thoát ứng dụng có xác nhận */
     void thoatKhoiChuongTrinh();
 
-    /** Lưu dữ liệu xuống File (Binary/Text) */
-    void thucHienSaveFile();
-
-    /** Đọc dữ liệu từ File lên bảng */
-    void thucHienOpenFile();
-
     /**
      * Hiển thị hộp thoại xác nhận (Yes/No) với icon cảnh báo.
      *

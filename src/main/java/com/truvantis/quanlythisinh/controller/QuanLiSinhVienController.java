@@ -2,9 +2,23 @@ package com.truvantis.quanlythisinh.controller; // Định nghĩa package chứa
 
 import java.awt.event.ActionEvent; // Sự kiện hành động (nhấn nút, menu, ...)
 import java.awt.event.ActionListener; // Interface lắng nghe ActionEvent
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List; // Danh sách động
 import java.util.Map; // Map key/value
 
+import javax.swing.SwingWorker;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import com.opencsv.CSVReader;
 import com.truvantis.quanlythisinh.model.ThiSinh; // Model thí sinh
 import com.truvantis.quanlythisinh.model.Tinh; // Model tỉnh
 import com.truvantis.quanlythisinh.service.impl.ThiSinhService; // Service xử lý nghiệp vụ thí sinh
@@ -102,10 +116,6 @@ public class QuanLiSinhVienController implements ActionListener {
                     this.view.showMessage("Vui lòng chọn một thí sinh trong bảng để xóa!");
                 }
                 break;
-            case "LUU":
-                // Lưu dữ liệu hiện tại ra file (có thể là .csv hoặc định dạng khác)
-                this.view.thucHienSaveFile();
-                break;
             case "TIM":
                 // Lấy điều kiện tìm kiếm (tỉnh hoặc mã thí sinh) từ giao diện
                 Map.Entry<Tinh, String> criteria = this.view.layDuLieuTim();
@@ -173,8 +183,163 @@ public class QuanLiSinhVienController implements ActionListener {
                     this.view.hienThiThongBao("Có lỗi xảy ra khi cập nhật thí sinh.");
                 }
                 break;
+            case "XUAT_FILE":
+                // Mở dialog chọn file để xuất
+                String filePath = this.view.showExportDialog();
+                if (filePath != null) {
+                    ArrayList<ThiSinh> ketQuaTimKiem = null;
+                    try {
+                        Map.Entry<Tinh, String> criteria2 = this.view.layDuLieuTim(); // Lấy điều kiện tìm kiếm đang
+                                                                                      // dùng
+                        try {
+                            // Thực hiện tìm kiếm với điều kiện hiện tại để có dữ liệu mới nhất
+                            ketQuaTimKiem = thiSinhService.timKiemTheoTenTinhHoacMaThiSinh(
+                                    criteria2.getKey().getTenTinh(),
+                                    Integer.parseInt(criteria2.getValue())); // Chuyển chuỗi thành số nguyên
+                            // Cập nhật bảng với kết quả tìm kiếm mới
+
+                        } catch (Exception e1) {
+                            // Nếu xảy ra lỗi trong quá trình làm mới, hiển thị thông báo
+                            this.view.showMessage("Có lỗi xảy ra.");
+                            e1.printStackTrace();
+                        }
+                        thiSinhService.exportToFile(filePath, ketQuaTimKiem);
+                        this.view.showMessage("Xuất file thành công!");
+                    } catch (Exception e3) {
+                        this.view.showMessage("Lỗi khi xuất file: " + e3.getMessage());
+                    }
+                }
+                break;
+            case "NHAP_FILE":
+                // Mở dialog chọn file để nhập
+                String importFilePath = this.view.showImportDialog();
+                if (importFilePath != null) {
+                    // Hiển thị progress dialog
+                    this.view.showProgressDialog();
+                    // Chạy import bất đồng bộ với progress
+                    SwingWorker<Void, Integer> importWorker = new SwingWorker<Void, Integer>() {
+                        @Override
+                        protected Void doInBackground() throws Exception {
+                            // Đếm số dòng để set max progress
+                            int totalLines = 0;
+                            if (importFilePath.toLowerCase().endsWith(".csv")) {
+                                try (java.io.LineNumberReader reader = new java.io.LineNumberReader(
+                                        new java.io.FileReader(importFilePath))) {
+                                    reader.skip(Long.MAX_VALUE);
+                                    totalLines = reader.getLineNumber() - 2; // Trừ 2 dòng header
+                                }
+                            } else if (importFilePath.toLowerCase().endsWith(".xlsx")) {
+                                try (java.io.FileInputStream fis = new FileInputStream(importFilePath);
+                                        Workbook workbook = new XSSFWorkbook(fis)) {
+                                    Sheet sheet = workbook.getSheetAt(0);
+                                    totalLines = sheet.getLastRowNum() - 2; // Trừ 3 dòng header (0-based)
+                                }
+                            }
+                            publish(0); // Bắt đầu
+
+                            // Import với progress
+                            if (importFilePath.toLowerCase().endsWith(".csv")) {
+                                // Import CSV
+                                try (CSVReader reader = new CSVReader(
+                                        new FileReader(importFilePath))) {
+                                    SimpleDateFormat dateFormat = new java.text.SimpleDateFormat(
+                                            "dd/MM/yyyy");
+                                    String[] line;
+                                    int lineIndex = 0;
+                                    int processed = 0;
+
+                                    while ((line = reader.readNext()) != null) {
+                                        lineIndex++;
+                                        if (lineIndex <= 2)
+                                            continue; // Bỏ qua 2 dòng đầu
+
+                                        if (line.length >= 8) {
+                                            ThiSinh ts = thiSinhService.parseThiSinhFromData(line,
+                                                    dateFormat);
+                                            if (ts != null) {
+                                                ThiSinh existing = thiSinhService
+                                                        .findById(ts.getMaThiSinh());
+                                                if (existing != null) {
+                                                    thiSinhService.update(ts);
+                                                } else {
+                                                    thiSinhService.insert(ts);
+                                                }
+                                            }
+                                        }
+                                        processed++;
+                                        if (totalLines > 0 && processed % 10 == 0) { // Publish mỗi 10 dòng
+                                            publish(Math.min(processed * 100 / totalLines, 99));
+                                        }
+                                    }
+                                    publish(100);
+                                }
+                            } else if (importFilePath.toLowerCase().endsWith(".xlsx")) {
+                                // Import XLSX
+                                try (FileInputStream fis = new FileInputStream(importFilePath);
+                                        Workbook workbook = new XSSFWorkbook(
+                                                fis)) {
+                                    Sheet sheet = workbook.getSheetAt(0);
+                                    SimpleDateFormat dateFormat = new java.text.SimpleDateFormat(
+                                            "dd/MM/yyyy");
+                                    int processed = 0;
+
+                                    for (int i = 3; i <= sheet.getLastRowNum(); i++) {
+                                        Row row = sheet.getRow(i);
+                                        if (row != null) {
+                                            String[] data = new String[8];
+                                            for (int j = 0; j < 8; j++) {
+                                                Cell cell = row.getCell(j);
+                                                data[j] = cell != null ? cell.toString() : "";
+                                            }
+                                            ThiSinh ts = thiSinhService.parseThiSinhFromData(data,
+                                                    dateFormat);
+                                            if (ts != null) {
+                                                com.truvantis.quanlythisinh.model.ThiSinh existing = thiSinhService
+                                                        .findById(ts.getMaThiSinh());
+                                                if (existing != null) {
+                                                    thiSinhService.update(ts);
+                                                } else {
+                                                    thiSinhService.insert(ts);
+                                                }
+                                            }
+                                        }
+                                        processed++;
+                                        if (totalLines > 0 && processed % 10 == 0) {
+                                            publish(Math.min(processed * 100 / totalLines, 99));
+                                        }
+                                    }
+                                    publish(100);
+                                }
+                            }
+                            return null;
+                        }
+
+                        @Override
+                        protected void process(List<Integer> chunks) {
+                            // Cập nhật progress
+                            for (int progress : chunks) {
+                                view.updateProgress(progress);
+                            }
+                        }
+
+                        @Override
+                        protected void done() {
+                            view.hideProgressDialog();
+                            try {
+                                get(); // Kiểm tra exception
+                                view.refreshTable(thiSinhService.getAllThiSinh());
+                                view.showMessage("Nhập file thành công!");
+                            } catch (Exception e) {
+                                view.showMessage("Lỗi khi nhập file: " + e.getMessage());
+                            }
+                        }
+                    };
+                    importWorker.execute();
+                }
+                break;
             default:
                 break;
         }
     }
+
 }

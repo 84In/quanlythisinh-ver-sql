@@ -24,4 +24,10 @@ public interface ThiSinhServiceInterface {
 
     // Lấy thông tin thí sinh theo ID
     ThiSinh findById(int maThiSinh);
+
+    // Xuất danh sách thí sinh ra file (có thể là .csv, .xlsx hoặc định dạng khác)
+    void exportToFile(String filePath, ArrayList<ThiSinh> thiSinhList);
+
+    // Nhập danh sách thí sinh từ file (có thể là .csv, .xlsx hoặc định dạng khác)
+    void importFromFile(String filePath);
 }
