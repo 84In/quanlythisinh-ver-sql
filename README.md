@@ -9,7 +9,8 @@
 ---
 
 ## 🖼 Xem trước giao diện
-<img width="1233" height="866" alt="image" src="https://github.com/user-attachments/assets/87f51846-8adb-4d74-ac06-691e4bc70fbd" />
+<img width="983" height="699" alt="{F7A2CF7A-32E5-41F8-9C85-4DC4EB61B4DA}" src="https://github.com/user-attachments/assets/7b0db47f-072e-4885-acb7-20645f885b2d" />
+" />
 
 
 ## ✨ Điểm nổi bật
