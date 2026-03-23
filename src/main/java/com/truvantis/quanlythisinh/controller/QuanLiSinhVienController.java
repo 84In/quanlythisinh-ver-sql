@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent; // Sự kiện hành động (nhấn nút, me
 import java.awt.event.ActionListener; // Interface lắng nghe ActionEvent
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.LineNumberReader;
 import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -120,12 +121,18 @@ public class QuanLiSinhVienController implements ActionListener {
                 // Lấy điều kiện tìm kiếm (tỉnh hoặc mã thí sinh) từ giao diện
                 Map.Entry<Tinh, String> criteria = this.view.layDuLieuTim();
                 try {
+                    int maTim = -1;
+                    if (criteria.getValue() != null && !criteria.getValue().trim().isEmpty()) {
+                        maTim = Integer.parseInt(criteria.getValue().trim());
+                    }
                     // Gọi service tìm kiếm theo tên tỉnh hoặc mã thí sinh
                     List<ThiSinh> ketQuaTimKiem = thiSinhService.timKiemTheoTenTinhHoacMaThiSinh(
                             criteria.getKey().getTenTinh(),
-                            Integer.parseInt(criteria.getValue()));
+                            maTim);
                     // Cập nhật lại bảng với kết quả tìm được
                     this.view.refreshTable(ketQuaTimKiem);
+                } catch (NumberFormatException ex) {
+                    this.view.showMessage("Mã thí sinh phải là số nguyên hợp lệ.");
                 } catch (Exception e1) {
                     // Nếu có lỗi xảy ra trong quá trình tìm kiếm thì hiện thông báo
                     this.view.showMessage("Có lỗi xảy ra khi tìm kiếm.");
@@ -153,12 +160,18 @@ public class QuanLiSinhVienController implements ActionListener {
                 // Làm mới dữ liệu dựa trên điều kiện tìm kiếm hiện tại (nếu có)
                 Map.Entry<Tinh, String> criteria1 = this.view.layDuLieuTim(); // Lấy điều kiện tìm kiếm đang dùng
                 try {
+                    int maTim1 = -1;
+                    if (criteria1.getValue() != null && !criteria1.getValue().trim().isEmpty()) {
+                        maTim1 = Integer.parseInt(criteria1.getValue().trim());
+                    }
                     // Thực hiện tìm kiếm với điều kiện hiện tại để có dữ liệu mới nhất
                     List<ThiSinh> ketQuaTimKiem = thiSinhService.timKiemTheoTenTinhHoacMaThiSinh(
                             criteria1.getKey().getTenTinh(),
-                            Integer.parseInt(criteria1.getValue())); // Chuyển chuỗi thành số nguyên
+                            maTim1);
                     // Cập nhật bảng với kết quả tìm kiếm mới
                     this.view.refreshTable(ketQuaTimKiem);
+                } catch (NumberFormatException ex) {
+                    this.view.showMessage("Mã thí sinh phải là số nguyên hợp lệ.");
                 } catch (Exception e1) {
                     // Nếu xảy ra lỗi trong quá trình làm mới, hiển thị thông báo
                     this.view.showMessage("Có lỗi xảy ra.");
@@ -214,8 +227,6 @@ public class QuanLiSinhVienController implements ActionListener {
                 // Mở dialog chọn file để nhập
                 String importFilePath = this.view.showImportDialog();
                 if (importFilePath != null) {
-                    // Hiển thị progress dialog
-                    this.view.showProgressDialog();
                     // Chạy import bất đồng bộ với progress
                     SwingWorker<Void, Integer> importWorker = new SwingWorker<Void, Integer>() {
                         @Override
@@ -223,13 +234,13 @@ public class QuanLiSinhVienController implements ActionListener {
                             // Đếm số dòng để set max progress
                             int totalLines = 0;
                             if (importFilePath.toLowerCase().endsWith(".csv")) {
-                                try (java.io.LineNumberReader reader = new java.io.LineNumberReader(
-                                        new java.io.FileReader(importFilePath))) {
+                                try (LineNumberReader reader = new LineNumberReader(
+                                        new FileReader(importFilePath))) {
                                     reader.skip(Long.MAX_VALUE);
                                     totalLines = reader.getLineNumber() - 2; // Trừ 2 dòng header
                                 }
                             } else if (importFilePath.toLowerCase().endsWith(".xlsx")) {
-                                try (java.io.FileInputStream fis = new FileInputStream(importFilePath);
+                                try (FileInputStream fis = new FileInputStream(importFilePath);
                                         Workbook workbook = new XSSFWorkbook(fis)) {
                                     Sheet sheet = workbook.getSheetAt(0);
                                     totalLines = sheet.getLastRowNum() - 2; // Trừ 3 dòng header (0-based)
@@ -294,7 +305,7 @@ public class QuanLiSinhVienController implements ActionListener {
                                             ThiSinh ts = thiSinhService.parseThiSinhFromData(data,
                                                     dateFormat);
                                             if (ts != null) {
-                                                com.truvantis.quanlythisinh.model.ThiSinh existing = thiSinhService
+                                                ThiSinh existing = thiSinhService
                                                         .findById(ts.getMaThiSinh());
                                                 if (existing != null) {
                                                     thiSinhService.update(ts);
@@ -335,6 +346,7 @@ public class QuanLiSinhVienController implements ActionListener {
                         }
                     };
                     importWorker.execute();
+                    this.view.showProgressDialog();
                 }
                 break;
             default:

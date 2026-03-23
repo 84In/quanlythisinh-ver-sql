@@ -30,14 +30,18 @@ import com.truvantis.quanlythisinh.service.ThiSinhServiceInterface;
  * truy vấn/ghi dữ liệu và logic xử lý trước khi lưu vào cơ sở dữ liệu.
  * </p>
  */
+
 public class ThiSinhService implements ThiSinhServiceInterface {
 
     private ThiSinhDao thiSinhDao;
     private TinhService tinhService;
+    private ArrayList<Tinh> tinhCache; // Cache để lưu trữ danh sách tỉnh đã tải
 
     public ThiSinhService() {
         this.thiSinhDao = ThiSinhDao.getInstance();
         this.tinhService = new TinhService();
+        this.tinhCache = new ArrayList<>(this.tinhService.getAllTinh()); // Tải danh sách tỉnh vào cache khi khởi tạo
+                                                                         // service
     }
 
     /**
@@ -405,11 +409,14 @@ public class ThiSinhService implements ThiSinhServiceInterface {
     public ThiSinh parseThiSinhFromData(String[] data, SimpleDateFormat dateFormat) {
         try {
             ThiSinh ts = new ThiSinh();
-            ts.setMaThiSinh(Integer.parseInt(data[0].trim()));
+            // ts.setMaThiSinh(Integer.parseInt(data[0].trim()));
             ts.setTenThiSinh(data[1].trim());
 
             // Tìm tỉnh
-            Tinh tinh = tinhService.findByName(data[2].trim());
+            Tinh tinh = this.tinhCache.stream()
+                    .filter(t -> t.getTenTinh().equalsIgnoreCase(data[2].trim()))
+                    .findFirst()
+                    .orElse(null);
             if (tinh == null) {
                 // Nếu không tìm thấy, bỏ qua hoặc tạo mới? Ở đây bỏ qua
                 System.out
